@@ -106,8 +106,7 @@ The app includes these routes:
 - `/my-items` — protected listing management
 - `/requests` — protected incoming, sent, and historical request management
 
-Set `VITE_API_URL` to the backend API base URL (including `/api/v1`) when using a backend other than the hosted default.
-In local development, API requests use the Vite `/api` proxy to the Render backend so the HTTP-only auth cookies stay first-party in the browser. Optionally set `VITE_API_PROXY_TARGET` to change the proxy host.
+The default API base URL is `/api/v1`. In local development, Vite proxies API requests to the Render backend. On Vercel, `vercel.json` proxies them to the same backend, keeping browser requests and auth cookies on the app's origin. Optionally set `VITE_API_PROXY_TARGET` to change the local development proxy host.
 
 ## Deploy to Vercel
 
@@ -118,9 +117,9 @@ Import this repository into Vercel and use the following project settings:
 - Output directory: `dist`
 - Install command: `npm install`
 
-The included `vercel.json` rewrites app routes to `index.html`, so direct visits and refreshes on routes such as `/item/:id` work. The app uses the hosted backend by default; set `VITE_API_URL` in the Vercel project environment variables only when deploying with a different API base URL (including `/api/v1`). Redeploy after changing environment variables.
+The included `vercel.json` proxies `/api/*` requests to the hosted backend and rewrites app routes to `index.html`, so authentication and direct visits/refreshes on routes such as `/item/:id` work without setting an environment variable. To use another backend, update the `/api/:path*` destination in `vercel.json` and redeploy.
 
-For login and other cookie-based features to work in production, configure the backend to allow the deployed Vercel domain in credentialed CORS and permit HTTPS cross-site cookies. Item photos can be downloaded from the item details page; supported mobile browsers open the native share sheet so the image can be saved or shared.
+Item photos can be downloaded from the item details page; supported mobile browsers open the native share sheet so the image can be saved or shared.
 
 ## Notes
 

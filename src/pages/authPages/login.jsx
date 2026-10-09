@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Eye, EyeOff } from "lucide-react";
 import { loginUser } from "../../features/auth/authSlice";
 
 const Login = () => {
@@ -43,8 +44,6 @@ const Login = () => {
         }
 
         try {
-
-            // Redux login
             const result = await dispatch(
                 loginUser({
                     email: formData.email.trim(),
@@ -52,22 +51,13 @@ const Login = () => {
                 })
             ).unwrap();
 
-            console.log("Login successful:", result);
-
-            // User data
-            console.log("User:", result.user);
-
-            // Login successful → Home
             navigate("/home");
-
         } catch (error) {
-
-            console.error("Login Error:", error);
-
             setError(
                 typeof error === "string"
                     ? error
-                    : "Something went wrong."
+                    : error?.message ||
+                          "Unable to log in. Please check your connection and try again."
             );
         }
     };
@@ -198,7 +188,8 @@ const Login = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="Enter your password"
-                                    className="form-input pr-16"
+                                    className="form-input"
+                                    style={{ paddingRight: "3.5rem" }}
                                     autoComplete="current-password"
                                     disabled={loading}
                                 />
@@ -209,9 +200,19 @@ const Login = () => {
                                         setShowPassword(!showPassword)
                                     }
                                     disabled={loading}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-blue-600 hover:text-blue-700"
+                                    aria-label={
+                                        showPassword
+                                            ? "Hide password"
+                                            : "Show password"
+                                    }
+                                    aria-pressed={showPassword}
+                                    className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-blue-600 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
                                 >
-                                    {showPassword ? "Hide" : "Show"}
+                                    {showPassword ? (
+                                        <EyeOff size={18} aria-hidden="true" />
+                                    ) : (
+                                        <Eye size={18} aria-hidden="true" />
+                                    )}
                                 </button>
                             </div>
                         </div>

@@ -5,8 +5,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { logout as logoutRedux } from "../../features/auth/authSlice";
-
-const API_URL = "https://swi-back.onrender.com/api/v1";
+import { API_URL } from "../../services/api.js";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

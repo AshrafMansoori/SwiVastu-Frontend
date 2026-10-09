@@ -34,7 +34,19 @@ export const loginUser = createAsyncThunk(
                 body: JSON.stringify({ email, password }),
             });
 
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch {
+                if (response.ok) {
+                    return rejectWithValue(
+                        "The server returned an invalid response."
+                    );
+                }
+                return rejectWithValue(
+                    `Login failed with status ${response.status}.`
+                );
+            }
 
             if (!response.ok) {
                 return rejectWithValue(
@@ -45,7 +57,9 @@ export const loginUser = createAsyncThunk(
             return result.data;
         } catch (error) {
             return rejectWithValue(
-                error.message || "Something went wrong"
+                error instanceof TypeError
+                    ? "Could not connect to the login service. Check your internet connection and try again."
+                    : error.message || "Something went wrong"
             );
         }
     }
