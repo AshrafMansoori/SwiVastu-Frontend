@@ -16,7 +16,6 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
-    Download,
 } from "lucide-react";
 
 import AuthNavbar from "../../components/Layout/AuthNavbar.jsx";
@@ -150,8 +149,6 @@ export default function ItemDetails() {
     const [item, setItem] = useState(null);
     const [selectedImage, setSelectedImage] = useState(0);
     const [images, setImages] = useState([]);
-    const [imageDownloadLoading, setImageDownloadLoading] = useState(false);
-    const [imageDownloadError, setImageDownloadError] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [userLocation, setUserLocation] = useState(null);
@@ -401,64 +398,6 @@ export default function ItemDetails() {
         }
     }
 
-    async function downloadImage() {
-        const imageUrl = images[selectedImage];
-        if (!imageUrl) return;
-
-        setImageDownloadLoading(true);
-        setImageDownloadError("");
-
-        try {
-            const response = await fetch(imageUrl);
-            if (!response.ok) {
-                throw new Error("The image could not be downloaded.");
-            }
-
-            const imageBlob = await response.blob();
-            const extension =
-                imageBlob.type.split("/")[1]?.split("+")[0] || "jpg";
-            const filename = `${(item.title || "swivastu-item")
-                .normalize("NFKD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-zA-Z0-9]+/g, "-")
-                .replace(/^-|-$/g, "")
-                .toLowerCase() || "swivastu-item"}-${selectedImage + 1}.${extension}`;
-            const imageFile = new File([imageBlob], filename, {
-                type: imageBlob.type || "application/octet-stream",
-            });
-
-            if (
-                navigator.share &&
-                navigator.canShare?.({ files: [imageFile] })
-            ) {
-                try {
-                    await navigator.share({
-                        files: [imageFile],
-                        title: item.title || "SwiVastu item",
-                    });
-                    return;
-                } catch (shareError) {
-                    if (shareError.name === "AbortError") return;
-                }
-            }
-
-            const objectUrl = URL.createObjectURL(imageBlob);
-            const link = document.createElement("a");
-            link.href = objectUrl;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-        } catch {
-            setImageDownloadError(
-                "Download failed. Open the image and press and hold it to save."
-            );
-        } finally {
-            setImageDownloadLoading(false);
-        }
-    }
-
     return (
         <div className="min-h-screen bg-[#f8faff] text-slate-900">
             <AuthNavbar />
@@ -531,37 +470,7 @@ export default function ItemDetails() {
                             )}
                         </div>
 
-                        {images.length > 0 && (
-                            <div className="mt-3">
-                                <button
-                                    type="button"
-                                    onClick={downloadImage}
-                                    disabled={imageDownloadLoading}
-                                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
-                                >
-                                    <Download size={17} />
-                                    {imageDownloadLoading
-                                        ? "Preparing image..."
-                                        : "Download image"}
-                                </button>
-                                {imageDownloadError && (
-                                    <p
-                                        role="status"
-                                        className="mt-2 text-sm text-red-700"
-                                    >
-                                        {imageDownloadError}{" "}
-                                        <a
-                                            href={images[selectedImage]}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="font-semibold underline"
-                                        >
-                                            Open image
-                                        </a>
-                                    </p>
-                                )}
-                            </div>
-                        )}
+
 
                         {/* Thumbnails */}
                         {images.length > 1 && (

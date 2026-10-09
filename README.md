@@ -106,7 +106,7 @@ The app includes these routes:
 - `/my-items` — protected listing management
 - `/requests` — protected incoming, sent, and historical request management
 
-The default API base URL is `/api/v1`. In local development, Vite proxies API requests and WebSocket connections to the Render backend. On Vercel, `vercel.json` proxies API requests to the same backend, keeping browser requests and auth cookies on the app's origin; messaging connects directly to the backend WebSocket endpoint. Optionally set `VITE_API_PROXY_TARGET` to change the local development proxy host or `VITE_SOCKET_URL` to override the production WebSocket backend origin.
+The default API base URL is `/api/v1`. In local development, Vite proxies API requests and WebSocket connections to the Render backend. On Vercel, `vercel.json` proxies both API requests and WebSocket connections to the same backend, keeping authentication cookies on the app's origin. Optionally set `VITE_API_PROXY_TARGET` to change the local development proxy host. When changing the production backend, update both the `/api/:path*` and `/socket` destinations in `vercel.json`.
 
 ## Deploy to Vercel
 
@@ -119,11 +119,9 @@ Import this repository into Vercel and use the following project settings:
 
 The included `vercel.json` proxies `/api/*` requests to the hosted backend and rewrites app routes to `index.html`, so authentication and direct visits/refreshes on routes such as `/item/:id` work without setting an environment variable. To use another backend, update the `/api/:path*` destination in `vercel.json` and redeploy.
 
-Item photos can be downloaded from the item details page; supported mobile browsers open the native share sheet so the image can be saved or shared.
-
 ## Notes
 
-The frontend sends authentication cookies with API requests. The backend must allow the frontend origin with credentialed CORS and use HTTPS for cross-site cookies.
+The frontend sends authentication cookies with API requests and refreshes an expired access token when the app starts. The backend keeps the access and refresh cookies for 10 days, matching `REFRESH_TOKEN_EXPIRY=10d`; keep the cookie lifetime in `src/constants.js` aligned if that token expiry changes. The backend must allow the frontend origin with credentialed CORS and use HTTPS for cross-site cookies.
 
 ## License
 

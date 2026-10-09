@@ -69,10 +69,12 @@ function AuthNavbar() {
     }, [refreshNotifications]);
 
     useEffect(() => {
-        const onNotificationsRead = () => {
-            setUnreadNotifications(
-                getUnreadNotificationCount(userId, notificationItems)
-            );
+        const onNotificationsRead = (event) => {
+            if (event.detail?.userId !== userId) return;
+
+            const notifications = event.detail.notifications || notificationItems;
+            setNotificationItems(notifications);
+            setUnreadNotifications(getUnreadNotificationCount(userId, notifications));
         };
         window.addEventListener("swivastu-notifications-read", onNotificationsRead);
         return () => {

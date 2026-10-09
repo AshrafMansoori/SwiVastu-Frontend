@@ -73,7 +73,7 @@ export const getCurrentUser = createAsyncThunk(
     "auth/getCurrentUser",
     async (_, { rejectWithValue }) => {
         try {
-            const response = await fetch(
+            let response = await fetch(
                 `${API_URL}/users/current-user`,
                 {
                     method: "GET",
@@ -81,7 +81,41 @@ export const getCurrentUser = createAsyncThunk(
                 }
             );
 
-            // Not logged in or session expired
+            if (response.status === 401) {
+                const refreshResponse = await fetch(
+                    `${API_URL}/users/refresh-token`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                    }
+                );
+
+                if (!refreshResponse.ok) {
+                    if ([400, 401].includes(refreshResponse.status)) {
+                        return rejectWithValue("UNAUTHENTICATED");
+                    }
+
+                    let refreshResult = {};
+                    try {
+                        refreshResult = await refreshResponse.json();
+                    } catch {
+                        // Keep the existing profile if the refresh service
+                        // is temporarily returning an invalid response.
+                    }
+                    return rejectWithValue(
+                        refreshResult?.message || "Unable to refresh login session"
+                    );
+                }
+
+                response = await fetch(
+                    `${API_URL}/users/current-user`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
+                );
+            }
+
             if (response.status === 401) {
                 return rejectWithValue("UNAUTHENTICATED");
             }

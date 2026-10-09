@@ -96,7 +96,11 @@ export function markNotificationsRead(userId, notifications) {
     notifications.forEach((notification) => readIds.add(notification.id));
     try {
         localStorage.setItem(readStateKey(userId), JSON.stringify([...readIds]));
-        window.dispatchEvent(new CustomEvent("swivastu-notifications-read"));
+        window.dispatchEvent(
+            new CustomEvent("swivastu-notifications-read", {
+                detail: { userId, notifications },
+            })
+        );
     } catch (error) {
         console.error("Unable to save notification status:", error);
     }
