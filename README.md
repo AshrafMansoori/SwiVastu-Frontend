@@ -109,6 +109,19 @@ The app includes these routes:
 Set `VITE_API_URL` to the backend API base URL (including `/api/v1`) when using a backend other than the hosted default.
 In local development, API requests use the Vite `/api` proxy to the Render backend so the HTTP-only auth cookies stay first-party in the browser. Optionally set `VITE_API_PROXY_TARGET` to change the proxy host.
 
+## Deploy to Vercel
+
+Import this repository into Vercel and use the following project settings:
+
+- Framework preset: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
+- Install command: `npm install`
+
+The included `vercel.json` rewrites app routes to `index.html`, so direct visits and refreshes on routes such as `/item/:id` work. The app uses the hosted backend by default; set `VITE_API_URL` in the Vercel project environment variables only when deploying with a different API base URL (including `/api/v1`). Redeploy after changing environment variables.
+
+For login and other cookie-based features to work in production, configure the backend to allow the deployed Vercel domain in credentialed CORS and permit HTTPS cross-site cookies. Item photos can be downloaded from the item details page; supported mobile browsers open the native share sheet so the image can be saved or shared.
+
 ## Notes
 
 The frontend sends authentication cookies with API requests. The backend must allow the frontend origin with credentialed CORS and use HTTPS for cross-site cookies.
