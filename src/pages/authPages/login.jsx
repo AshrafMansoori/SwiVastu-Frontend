@@ -44,7 +44,7 @@ const Login = () => {
         }
 
         try {
-            const result = await dispatch(
+            await dispatch(
                 loginUser({
                     email: formData.email.trim(),
                     password: formData.password,
