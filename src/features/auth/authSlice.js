@@ -1,6 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { API_URL } from "../../services/api.js";
 
-const API_URL = "https://swi-back.onrender.com/api/v1";
+export const AUTH_STORAGE_KEY = "swivastu.auth.user";
+
+const loadCachedUser = () => {
+    try {
+        const cachedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+        const user = cachedUser ? JSON.parse(cachedUser) : null;
+
+        return user && typeof user === "object" && !Array.isArray(user)
+            ? user
+            : null;
+    } catch (error) {
+        console.error("Unable to restore cached profile:", error);
+        return null;
+    }
+};
 
 /* =========================
    LOGIN USER
@@ -10,20 +25,14 @@ export const loginUser = createAsyncThunk(
     "auth/loginUser",
     async ({ email, password }, { rejectWithValue }) => {
         try {
-            const response = await fetch(
-                `${API_URL}/users/login`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({
-                        email,
-                        password,
-                    }),
-                }
-            );
+            const response = await fetch(`${API_URL}/users/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ email, password }),
+            });
 
             const result = await response.json();
 
@@ -34,7 +43,6 @@ export const loginUser = createAsyncThunk(
             }
 
             return result.data;
-
         } catch (error) {
             return rejectWithValue(
                 error.message || "Something went wrong"
@@ -42,7 +50,6 @@ export const loginUser = createAsyncThunk(
         }
     }
 );
-
 
 /* =========================
    GET CURRENT USER
@@ -60,6 +67,11 @@ export const getCurrentUser = createAsyncThunk(
                 }
             );
 
+            // Not logged in or session expired
+            if (response.status === 401) {
+                return rejectWithValue("UNAUTHENTICATED");
+            }
+
             const result = await response.json();
 
             if (!response.ok) {
@@ -68,8 +80,17 @@ export const getCurrentUser = createAsyncThunk(
                 );
             }
 
-            return result.data;
+            const user =
+                result?.data?.user ??
+                result?.data ??
+                result?.user ??
+                null;
 
+            if (!user || typeof user !== "object" || Array.isArray(user)) {
+                return rejectWithValue("Invalid current-user response");
+            }
+
+            return user;
         } catch (error) {
             return rejectWithValue(
                 error.message || "Something went wrong"
@@ -78,22 +99,19 @@ export const getCurrentUser = createAsyncThunk(
     }
 );
 
-
 /* =========================
    INITIAL STATE
 ========================= */
 
-const initialState = {
-    user: null,
-    isAuthenticated: false,
+const cachedUser = loadCachedUser();
 
+const initialState = {
+    user: cachedUser,
+    isAuthenticated: Boolean(cachedUser),
     loading: false,
     error: null,
-
-    // Important for initial authentication check
     authChecked: false,
 };
-
 
 /* =========================
    AUTH SLICE
@@ -101,11 +119,9 @@ const initialState = {
 
 const authSlice = createSlice({
     name: "auth",
-
     initialState,
 
     reducers: {
-
         logout: (state) => {
             state.user = null;
             state.isAuthenticated = false;
@@ -120,10 +136,7 @@ const authSlice = createSlice({
     },
 
     extraReducers: (builder) => {
-
-        /* =========================
-           LOGIN
-        ========================= */
+        /* LOGIN */
 
         builder
             .addCase(loginUser.pending, (state) => {
@@ -134,8 +147,9 @@ const authSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
 
-                state.user = action.payload.user;
-                state.isAuthenticated = true;
+                const payload = action.payload;
+                state.user = payload?.user ?? payload;
+                state.isAuthenticated = Boolean(state.user);
 
                 state.error = null;
                 state.authChecked = true;
@@ -143,55 +157,50 @@ const authSlice = createSlice({
 
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
-
                 state.user = null;
                 state.isAuthenticated = false;
-
-                state.error =
-                    action.payload || "Login failed";
-
+                state.error = action.payload || "Login failed";
                 state.authChecked = true;
             });
 
-
-        /* =========================
-           CURRENT USER
-        ========================= */
+        /* CURRENT USER */
 
         builder
             .addCase(getCurrentUser.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
 
             .addCase(getCurrentUser.fulfilled, (state, action) => {
-                state.loading = false;
+                const payload = action.payload;
 
-                state.user = action.payload;
-                state.isAuthenticated = true;
+                state.user = payload?.user ?? payload;
+                state.isAuthenticated = Boolean(state.user);
 
                 state.error = null;
                 state.authChecked = true;
             })
 
-            .addCase(getCurrentUser.rejected, (state) => {
-                state.loading = false;
-
-                state.user = null;
-                state.isAuthenticated = false;
-
-                // No error required for normal logged-out users
-                state.error = null;
-
+            .addCase(getCurrentUser.rejected, (state, action) => {
                 state.authChecked = true;
+
+                if (action.payload === "UNAUTHENTICATED") {
+                    state.user = null;
+                    state.isAuthenticated = false;
+                    state.error = null;
+                } else {
+                    // Keep existing auth state during a temporary
+                    // network or server error.
+                    state.error =
+                        action.payload || action.error?.message || null;
+                }
             });
     },
 });
 
+/* =========================
+   EXPORTS
+========================= */
 
-export const {
-    logout,
-    clearError,
-} = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -2,7 +2,7 @@
 
 SwiVastu is a modern peer-to-peer marketplace frontend built with React and Vite. The platform enables users to buy, sell, exchange, rent, or give away items they no longer need in a simple, community-driven experience.
 
-This project provides the landing experience and navigation for the app, with routes for home, login, and registration.
+The frontend includes the landing experience, authentication, item discovery, listing creation, item details, and marketplace request initiation.
 
 ## Overview
 
@@ -42,10 +42,13 @@ src/
 ## Features
 
 - responsive landing page
-- interactive marketplace messaging and call-to-action sections
-- category browsing UI
-- step-by-step onboarding sections
-- route-based navigation for login, register, and home pages
+- responsive item discovery with search, category filters, sorting, and paging
+- navbar search, saved/liked items, and marketplace activity notifications
+- unread notification counts for incoming requests and transaction status changes
+- secure cookie-based authentication and protected member routes
+- create and manage item listings, including photos and sell, exchange, rent, and giveaway options
+- item details with owner-safe profile information
+- purchase, giveaway, exchange, and rental request initiation
 - clean, modern visual design focused on reuse and exchange
 
 ## Getting Started
@@ -92,16 +95,23 @@ npm run lint     # run ESLint checks
 
 ## Routing
 
-The app currently includes these routes:
+The app includes these routes:
 
 - `/` — landing page
-- `/login` — login page placeholder
-- `/register` — registration page placeholder
-- `/home` — home page placeholder
+- `/login` — sign in
+- `/register` — create an account
+- `/home` — protected marketplace discovery
+- `/item/:id` — item details and request actions
+- `/create-item` — protected item listing form
+- `/my-items` — protected listing management
+- `/requests` — protected incoming, sent, and historical request management
+
+Set `VITE_API_URL` to the backend API base URL (including `/api/v1`) when using a backend other than the hosted default.
+In local development, API requests use the Vite `/api` proxy to the Render backend so the HTTP-only auth cookies stay first-party in the browser. Optionally set `VITE_API_PROXY_TARGET` to change the proxy host.
 
 ## Notes
 
-This repository currently focuses on the frontend presentation and flow. Full backend integration, authentication, item listing, and marketplace logic can be added on top of this foundation.
+The frontend sends authentication cookies with API requests. The backend must allow the frontend origin with credentialed CORS and use HTTPS for cross-site cookies.
 
 ## License
 

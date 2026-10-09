@@ -1,6 +1,6 @@
 // Login.jsx
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../features/auth/authSlice";
@@ -58,7 +58,7 @@ const Login = () => {
             console.log("User:", result.user);
 
             // Login successful → Home
-            navigate("/");
+            navigate("/home");
 
         } catch (error) {
 
@@ -129,7 +129,7 @@ const Login = () => {
                 <div className="px-5 py-6 sm:px-8 sm:py-8">
 
                     {/* Mobile Logo */}
-                    <div className="mb-5 flex items-center justify-center gap-2 lg:hidden">
+                    <Link to="/" className="mb-5 flex items-center justify-center gap-2 lg:hidden">
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-bold">
                             S
                         </div>
@@ -137,7 +137,11 @@ const Login = () => {
                         <span className="text-lg font-bold text-gray-800">
                             SwiVastu
                         </span>
-                    </div>
+                    </Link>
+
+                    <Link to="/" className="mb-4 hidden text-xs font-semibold text-blue-700 hover:underline lg:inline-flex">
+                        ← Back to home
+                    </Link>
 
                     {/* Heading */}
                     <div className="mb-6 text-center">

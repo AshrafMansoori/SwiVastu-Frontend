@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "../../services/api.js";
 
 const Register = () => {
+    const navigate = useNavigate();
     const fileInputRef = useRef(null);
 
     const [showPassword, setShowPassword] = useState(false);
@@ -233,7 +235,7 @@ const Register = () => {
         }
 
         const response = await fetch(
-            "https://swi-back.onrender.com/api/v1/users/register",
+            `${API_URL}/users/register`,
             {
                 method: "POST",
                 body: data,
@@ -248,12 +250,12 @@ const Register = () => {
             );
         }
 
-        console.log("Registration successful:", result);
-
-        alert("Account created successfully!");
-
-        // Later:
-        // navigate("/login");
+        if (!result?.data) {
+            throw new Error("The server returned an invalid registration response.");
+        }
+        navigate("/login", {
+            state: { registrationComplete: true },
+        });
 
     } catch (error) {
         console.error("Registration error:", error);
@@ -356,17 +358,19 @@ const Register = () => {
 
                         {/* Mobile Logo */}
 
-                        <div className="mb-3 flex items-center gap-1.5 lg:hidden">
+                        <Link to="/" className="mb-3 flex items-center gap-1.5 lg:hidden">
 
                             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white">
                                 S
                             </div>
-
                             <span className="text-sm font-bold text-gray-900">
                                 SwiVastu
                             </span>
+                        </Link>
 
-                        </div>
+                        <Link to="/" className="mb-3 hidden text-xs font-semibold text-blue-700 hover:underline lg:inline-flex">
+                            ← Back to home
+                        </Link>
 
 
                         {/* Heading */}
