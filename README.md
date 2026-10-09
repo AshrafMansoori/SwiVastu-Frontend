@@ -106,7 +106,7 @@ The app includes these routes:
 - `/my-items` — protected listing management
 - `/requests` — protected incoming, sent, and historical request management
 
-The default API base URL is `/api/v1`. In local development, Vite proxies API requests to the Render backend. On Vercel, `vercel.json` proxies them to the same backend, keeping browser requests and auth cookies on the app's origin. Optionally set `VITE_API_PROXY_TARGET` to change the local development proxy host.
+The default API base URL is `/api/v1`. In local development, Vite proxies API requests and WebSocket connections to the Render backend. On Vercel, `vercel.json` proxies API requests to the same backend, keeping browser requests and auth cookies on the app's origin; messaging connects directly to the backend WebSocket endpoint. Optionally set `VITE_API_PROXY_TARGET` to change the local development proxy host or `VITE_SOCKET_URL` to override the production WebSocket backend origin.
 
 ## Deploy to Vercel
 

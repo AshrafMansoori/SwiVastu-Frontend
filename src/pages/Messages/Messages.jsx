@@ -7,9 +7,38 @@ import AuthNavbar from "../../components/Layout/AuthNavbar.jsx";
 import { apiRequest, API_URL } from "../../services/api.js";
 
 const TYPES = ["purchase", "exchange", "rent"];
+
+function getSocketUrl() {
+    const defaultBackendUrl = "https://swi-back.onrender.com";
+    const backendUrl =
+        import.meta.env.VITE_SOCKET_URL ||
+        (/^https?:\/\//i.test(API_URL) ? API_URL : defaultBackendUrl);
+    let socketUrl;
+
+    try {
+        const backend = new URL(backendUrl);
+        if (
+            !["http:", "https:", "ws:", "wss:"].includes(backend.protocol) ||
+            !backend.hostname
+        ) {
+            throw new TypeError("The backend URL must use HTTP(S) or WS(S).");
+        }
+        socketUrl = new URL("/socket", backend);
+    } catch (cause) {
+        console.error(
+            "Invalid WebSocket backend URL. Falling back to the default backend; check VITE_SOCKET_URL.",
+            cause
+        );
+        socketUrl = new URL("/socket", defaultBackendUrl);
+    }
+
+    socketUrl.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return socketUrl.toString();
+}
+
 const SOCKET_URL = import.meta.env.DEV
     ? `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/socket`
-    : `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${new URL(API_URL).host}`;
+    : getSocketUrl();
 
 const REQUEST_ENDPOINTS = {
     purchase: ["/purchase/incoming", "/purchase/outgoing"],
