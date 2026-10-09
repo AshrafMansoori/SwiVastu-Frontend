@@ -1,6 +1,8 @@
 export const API_URL =
     import.meta.env.VITE_API_URL ||
-    "/api/v1";
+    (import.meta.env.DEV
+        ? "/api/v1"
+        : "https://swi-back.onrender.com/api/v1");
 
 export async function apiRequest(path, options = {}) {
     const headers = new Headers(options.headers);

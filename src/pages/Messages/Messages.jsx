@@ -4,11 +4,12 @@ import { useSelector } from "react-redux";
 import { ArrowLeft, MessageCircle, Send, Wifi, WifiOff } from "lucide-react";
 
 import AuthNavbar from "../../components/Layout/AuthNavbar.jsx";
-import { apiRequest } from "../../services/api.js";
+import { apiRequest, API_URL } from "../../services/api.js";
 
 const TYPES = ["purchase", "exchange", "rent"];
 
-const SOCKET_URL = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/socket`;
+const backendUrl = new URL(API_URL, window.location.origin);
+const SOCKET_URL = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${backendUrl.host}/socket`;
 
 const REQUEST_ENDPOINTS = {
     purchase: ["/purchase/incoming", "/purchase/outgoing"],

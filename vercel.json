@@ -5,10 +5,6 @@
       "destination": "https://swi-back.onrender.com/api/:path*"
     },
     {
-      "source": "/socket",
-      "destination": "https://swi-back.onrender.com/socket"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

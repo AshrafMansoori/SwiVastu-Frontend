@@ -106,7 +106,7 @@ The app includes these routes:
 - `/my-items` — protected listing management
 - `/requests` — protected incoming, sent, and historical request management
 
-The default API base URL is `/api/v1`. In local development, Vite proxies API requests and WebSocket connections to the Render backend. On Vercel, `vercel.json` proxies both API requests and WebSocket connections to the same backend, keeping authentication cookies on the app's origin. Optionally set `VITE_API_PROXY_TARGET` to change the local development proxy host. When changing the production backend, update both the `/api/:path*` and `/socket` destinations in `vercel.json`.
+In local development, the default API base URL is `/api/v1`, and Vite proxies API requests and WebSocket connections to the Render backend. In production, API requests and the messaging WebSocket connect directly to `https://swi-back.onrender.com` so the browser can send the backend's authentication cookie on both connections. Set `VITE_API_URL` to `<backend-origin>/api/v1` when using another backend. The backend must allow the deployed frontend origin through `CORS_ORIGIN`; the default backend allows `https://swi-vastu.vercel.app`. `VITE_API_PROXY_TARGET` changes the local development proxy host.
 
 ## Deploy to Vercel
 
@@ -117,7 +117,7 @@ Import this repository into Vercel and use the following project settings:
 - Output directory: `dist`
 - Install command: `npm install`
 
-The included `vercel.json` proxies `/api/*` requests to the hosted backend and rewrites app routes to `index.html`, so authentication and direct visits/refreshes on routes such as `/item/:id` work without setting an environment variable. To use another backend, update the `/api/:path*` destination in `vercel.json` and redeploy.
+The included `vercel.json` keeps an API proxy available and rewrites app routes to `index.html`, so direct visits and refreshes on routes such as `/item/:id` work. Production API calls use the backend origin directly by default; set `VITE_API_URL` in Vercel when using another backend.
 
 ## Notes
 
