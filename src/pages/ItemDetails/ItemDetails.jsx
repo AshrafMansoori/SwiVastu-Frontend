@@ -66,6 +66,25 @@ function getPrice(item, type) {
         : "Contact owner";
 }
 
+function getBarterPreferences(preferences) {
+    if (preferences == null) return [];
+
+    let values = preferences;
+
+    if (typeof values === "string") {
+        try {
+            values = JSON.parse(values);
+        } catch {
+            values = values.split(",");
+        }
+    }
+
+    return (Array.isArray(values) ? values : [values])
+        .filter((value) => value != null)
+        .map((value) => String(value).trim())
+        .filter(Boolean);
+}
+
 function getDistance(item, userLocation) {
     const coordinates = item?.location?.coordinates;
 
@@ -320,9 +339,18 @@ export default function ItemDetails() {
     const isOwner =
         currentUser?._id &&
         String(currentUser._id) === String(owner?._id || item.ownerId);
-    const availableTypes = Array.isArray(item.listingType)
-        ? item.listingType.map((value) => String(value).toLowerCase())
-        : [String(item.listingType || type).toLowerCase()];
+    const availableTypes = Array.from(
+        new Set(
+            (Array.isArray(item.listingType)
+                ? item.listingType
+                : [item.listingType || type]
+            ).map((value) => String(value).toLowerCase())
+        )
+    );
+    const priceTypes = availableTypes.filter(
+        (availableType) => availableType !== "barter"
+    );
+    const barterPreferences = getBarterPreferences(item.barterPreferences);
 
     async function openRequest(type) {
         if (!currentUser) {
@@ -531,7 +559,7 @@ export default function ItemDetails() {
                         </h1>
 
                         <div className="mt-4 flex flex-wrap gap-2">
-                            {availableTypes.map((availableType) => (
+                            {priceTypes.map((availableType) => (
                                 <p key={availableType} className="rounded-lg bg-white px-3 py-2 text-lg font-bold text-blue-700">
                                     {getPrice(item, availableType)}
                                 </p>
@@ -623,21 +651,22 @@ export default function ItemDetails() {
 
                         {/* Barter preferences */}
                         {availableTypes.includes("barter") &&
-                            item.barterPreferences && (
+                            barterPreferences.length > 0 && (
                                 <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4">
                                     <h2 className="font-semibold text-slate-900">
                                         Exchange preferences
                                     </h2>
 
-                                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">
-                                        {typeof item.barterPreferences === "string"
-                                            ? item.barterPreferences
-                                            : JSON.stringify(
-                                                  item.barterPreferences,
-                                                  null,
-                                                  2
-                                              )}
-                                    </p>
+                                    <ul className="mt-3 flex flex-wrap gap-2">
+                                        {barterPreferences.map((preference, index) => (
+                                            <li
+                                                key={`${preference}-${index}`}
+                                                className="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium capitalize text-blue-700"
+                                            >
+                                                {preference}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             )}
 
