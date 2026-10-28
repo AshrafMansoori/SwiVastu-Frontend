@@ -325,7 +325,12 @@ export default function Requests() {
 
                             return (
                                 <article key={request._id} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:p-5">
-                                    <Link to={item?._id ? `/item/${item._id}` : "/home"} className="flex min-w-0 flex-1 items-center gap-4">
+                                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                                        <Link
+                                            to={item?._id ? `/item/${item._id}` : "/home"}
+                                            aria-label={`View ${item?.title || "requested item"}`}
+                                            className="shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        >
                                         {getImage(item) ? (
                                             <img src={getImage(item)} alt="" loading="lazy" className="h-20 w-20 shrink-0 rounded-xl bg-slate-100 object-cover" />
                                         ) : (
@@ -333,14 +338,34 @@ export default function Requests() {
                                                 <Package size={25} />
                                             </div>
                                         )}
+                                        </Link>
                                         <div className="min-w-0">
+                                            <Link
+                                                to={item?._id ? `/item/${item._id}` : "/home"}
+                                                className="rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
                                             <h2 className="truncate font-bold text-slate-900">{item?.title || "Item no longer available"}</h2>
+                                            </Link>
                                             <p className="mt-1 text-sm text-slate-600">
                                                 {direction === "incoming" ? "From" : "With"}{" "}
                                                 <span className="font-semibold text-slate-800">{otherParty?.fullname || "SwiVastu member"}</span>
                                             </p>
                                             {type === "exchange" && request.offeredItemId?.title && (
-                                                <p className="mt-1 text-xs text-slate-500">Offered: {request.offeredItemId.title}</p>
+                                                <p className="mt-1 text-xs text-slate-500">
+                                                    Offered:{" "}
+                                                    {request.offeredItemId?._id ? (
+                                                        <Link
+                                                            to={`/item/${request.offeredItemId._id}`}
+                                                            className="font-semibold text-blue-700 underline decoration-blue-200 underline-offset-2 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        >
+                                                            {request.offeredItemId.title}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="font-semibold text-slate-700">
+                                                            {request.offeredItemId.title}
+                                                        </span>
+                                                    )}
+                                                </p>
                                             )}
                                             {type === "rent" && (
                                                 <p className="mt-1 text-xs text-slate-500">
@@ -351,7 +376,7 @@ export default function Requests() {
                                                 {formatDate(request.createdAt)}
                                             </p>
                                         </div>
-                                    </Link>
+                                    </div>
 
                                     <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                                         <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
